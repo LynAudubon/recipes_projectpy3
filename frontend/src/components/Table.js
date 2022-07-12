@@ -26,6 +26,7 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import  { recipeSlice } from '../redux/slice/recipe';
 import { DELETE_RECIPE_BY_ID, GET_RECIPES } from '../redux/types';
+import SignIn from './SignIn';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -291,13 +292,13 @@ export default function EnhancedTable() {
 
   return (
     isLoading ? <p>Loading...</p> :(
-    isAuthenticated && (
+    isAuthenticated ? (
       <Box sx={{ width: "100%", height: "100vh", flexdDirection:"column"}}>
       <Paper sx={{ width: "100%"}}>
         <EnhancedTableToolbar numSelected={selected.length} onDelete={handleDelete}/>
-        <TableContainer sx={{ width: "fit-content", overflow: "auto"}}>
+        <TableContainer sx={{ width: "100%" }}>
           <Table
-            sx={{ minWidth: 1050 }}
+            sx={{ minWidth: 700}}
             aria-labelledby="tableTitle"
             size={dense ? 'small' : 'medium'}
           >
@@ -309,7 +310,7 @@ export default function EnhancedTable() {
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
             />
-            <TableBody>
+            <TableBody >
               {/* if you don't need to support IE11, you can replace the `stableSort` call with:
                  rows.slice().sort(getComparator(order, orderBy)) */}
               {stableSort(rows, getComparator(order, orderBy))
@@ -391,5 +392,5 @@ export default function EnhancedTable() {
         label="Dense padding"
       />
     </Box>
-  )))
+  ) : <SignIn/>))
 };

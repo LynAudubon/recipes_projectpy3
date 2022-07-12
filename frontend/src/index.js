@@ -15,10 +15,11 @@ root.render(
     <Auth0Provider
       domain={domain}
       clientId={clientId}
-      redirectUri={window.location.origin + '/react-auth0/dashboard'}
-      responseType={'id_token token'}
+      redirectUri={window.location.origin + "/dashboard"}
+      useRefreshTokens={ true }
+      cacheLocation="localstorage"
     >
-      <BrowserRouter basename="/react-auth0">
+      <BrowserRouter basename="/">
         <App />
       </BrowserRouter>
     </Auth0Provider>

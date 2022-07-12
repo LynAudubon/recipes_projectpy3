@@ -21,7 +21,7 @@ const App = () => {
           <Route path='/update-recipe/:id' element={<UpdateRecipe/>} />
            <Route path='/recipe/:id' element={<RecipeCard/>} />
           <Route path='/signIn' element={<SignIn/>} />
-          <Route path='*' element={<SignIn/>} />
+          <Route path='*' element={<Table/>} />
         </Routes>
       </Provider>
   </>

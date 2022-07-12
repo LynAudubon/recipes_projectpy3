@@ -1,9 +1,9 @@
 .MuiPaper-root{
-    width: 100%;
+    width: 100vw;
 }
 
-.MuiBox-root{
-    width: 100%;
+.MuiTableContainer-root{
+    width: 100vw;
 }
 
 /* Customize the label (the contained) */
@@ -46,7 +46,8 @@
 
 /* When the checkbox is checked, add a blue background */
 .contained input:checked ~ .checkmark {
-    background-color: #2196F3;
+    /* background-color: #2196F3; */
+    background-color: #21f352;
 }
 
 /* Create the checkmark/indicator (hidden when not checked) */

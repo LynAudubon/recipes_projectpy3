@@ -37,7 +37,7 @@ export default function NavBar() {
           <Button
             color="inherit"
             onClick={() => {
-              logout({ returnTo: window.location.origin + '/' });
+              logout({ returnTo: window.location.origin + '/signIn' });
             }}
             sx={{ my: 2, display: "block" }}
           >

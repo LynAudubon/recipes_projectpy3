@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import  { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom'
 import { styled } from '@material-ui/core/styles';
@@ -17,35 +17,90 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import MenuBookRoundedIcon from '@material-ui/icons/MenuBookRounded';
 import RestaurantRoundedIcon from '@material-ui/icons/RestaurantRounded';
 import '../css/global.css';
-
-const ExpandMore = styled((props) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-  marginLeft: 'auto',
-  transition: theme.transitions.create('transform', {
-    duration: theme.transitions.duration.shortest,
-  }),
-}));
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import Grow from '@material-ui/core/Grow';
+import Paper from '@material-ui/core/Paper';
+import Popper from '@material-ui/core/Popper';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
+import Stack from '@material-ui/core/Stack';
 
 
 function Label(props) {
-    return (
-        <label class="contained">{props.data} 
-            <input type="checkbox"/>
-            <span class="checkmark"></span>
-        </label>
-    )
+  return (
+      <label class="contained">{props.data} 
+          <input type="checkbox"/>
+          <span class="checkmark"></span>
+      </label>
+  )
 };
 
 export default function RecipeCard(props) {
   const location = useLocation();
-  const id = location.state.from;  
-//   console.log('id', id);
-  const items = useSelector(state => state.recipes);
-//   console.log('items', items)
-  const recipe = items.filter((x)=> x.id === id)[0];
+  const id = location.state.from; 
+  const item = useSelector(state => {
+    return state.recipes.filter((x)=> x.id === id)[0];
+  });
+
+  const [open, setOpen] = useState(false);
+  const anchorRef = useRef(null);
+
+  const handleToggle = () => {
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleClose = (event) => {
+    if (anchorRef.current && anchorRef.current.contains(event.target)) {
+      return;
+    }
+    setOpen(false);
+  };
+
+  function handleListKeyDown(event) {
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      setOpen(false);
+    } else if (event.key === 'Escape') {
+      setOpen(false);
+    }
+  }
+
+  // return focus to the button when we transitioned from !open -> open
+  const prevOpen = useRef(open);
+  useEffect(() => {
+    if (prevOpen.current === true && open === false) {
+      anchorRef.current.focus();
+    }
+
+    prevOpen.current = open;
+  }, [open]);
+
+  const ExpandMore = styled((props) => {
+    const { expand, ...other } = props;
+    return <IconButton {...other} />;
+  })(({ theme, expand }) => ({
+    transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
+    marginLeft: 'auto',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.shortest,
+    }),
+  }));
+
+  const [recipe, setRecipe] = useState(item);
+  console.log('recipe', recipe); 
+  
+
+  useEffect(() => {
+    if(recipe === undefined) {const data = window.localStorage.getItem(JSON.parse("recipe" + {id}))
+    setRecipe(data)
+  }
+  }, 
+
+  useEffect(() => {
+    window.localStorage.setItem(`recipe${id}`, JSON.parse(JSON.stringify(recipe)))
+  })
+  
+  console.log('recipe2', recipe)
   const ingredientsList = recipe.ingredients.split(',');
     
   const [expanded, setExpanded] = React.useState(false);
@@ -62,11 +117,55 @@ export default function RecipeCard(props) {
             {recipe.name[0].toUpperCase()}
           </Avatar>
         }
-        action={
-          <IconButton aria-label="settings">
+      action={
+      <Stack direction="row" spacing={2}>
+      <div>
+          <IconButton 
+          ref={anchorRef}
+          id="composition-button"
+          aria-controls={open ? 'composition-menu' : undefined}
+          aria-expanded={open ? 'true' : undefined}
+          aria-haspopup="true"
+          onClick={handleToggle}
+          aria-label="settings">
             <MoreVertIcon />
           </IconButton>
-        }
+        <Popper
+          open={open}
+          anchorEl={anchorRef.current}
+          role={undefined}
+          placement="bottom-start"
+          transition
+          disablePortal
+        >
+          {({ TransitionProps, placement }) => (
+            <Grow
+              {...TransitionProps}
+              style={{
+                transformOrigin:
+                  placement === 'bottom-start' ? 'left top' : 'left bottom',
+              }}
+            >
+              <Paper>
+                <ClickAwayListener onClickAway={handleClose}>
+                  <MenuList
+                    autoFocusItem={open}
+                    id="composition-menu"
+                    aria-labelledby="composition-button"
+                    onKeyDown={handleListKeyDown}
+                  >
+                    <MenuItem onClick={handleClose}>Profile</MenuItem>
+                    <MenuItem onClick={handleClose}>My account</MenuItem>
+                    <MenuItem onClick={handleClose}>Logout</MenuItem>
+                  </MenuList>
+                </ClickAwayListener>
+              </Paper>
+            </Grow>
+          )}
+        </Popper>
+      </div>
+      </Stack>
+      }
         title={recipe.name}
         subheader={recipe.date_added}
       />
@@ -81,7 +180,7 @@ export default function RecipeCard(props) {
           {recipe.notes}
         </Typography>
       </CardContent>
-      <CardActions disableSpacing >
+      <CardActions>
         <CardActions style={{ margin: 0, display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
             <CardContent style={{display: 'flex', flexDirection: 'row'}}>
                 <MenuBookRoundedIcon/> 
@@ -97,6 +196,7 @@ export default function RecipeCard(props) {
           onClick={handleExpandClick}
           aria-expanded={expanded}
           aria-label="show more"
+          style={{marginRight: '5px', position:'relative', bottom: '12px'}}
         >
           <ExpandMoreIcon />
         </ExpandMore>
