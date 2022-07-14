@@ -15,7 +15,7 @@ export default function NavBar() {
 
   return (
     <Box sx={{ flexGrow: 1}}>
-      <AppBar position="static">
+      <AppBar id="navbar" sx={{ background: "#F9B208"}} position="static">
         {isAuthenticated && 
         <Toolbar>
           <IconButton
@@ -26,12 +26,12 @@ export default function NavBar() {
             sx={{ mr: 2 }}
           >
             <Link to='/dashboard' style={{textDecoration:'none', color:'whitesmoke'}}>
-                 <HomeIcon />
+                 <HomeIcon sx={{fontSize:"35px"}}/>
             </Link>
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
              <Link to='/add-recipe' style={{textDecoration:'none', color:'whitesmoke'}}>
-                <Button color="inherit">Add Recipe</Button>
+                <Button style={{fontSize: "17px"}} color="inherit">Add Recipe</Button>
             </Link>
           </Typography>
           <Button
@@ -39,7 +39,7 @@ export default function NavBar() {
             onClick={() => {
               logout({ returnTo: window.location.origin + '/signIn' });
             }}
-            sx={{ my: 2, display: "block" }}
+            sx={{ my: 2, display: "block", fontSize: "17px" }}
           >
             Sign Out
           </Button>
@@ -50,7 +50,7 @@ export default function NavBar() {
         <Grid>
             <Grid container justifyContent="center">
               <Typography variant="h4" justifyContent="center">
-                <span style={{paddingRight:'35px'}}>My Recipe Book</span>  <Button variant="contained" onClick={loginWithRedirect} >Sign In</Button>
+                <span style={{ paddingRight:'35px'}}>My Recipe Book</span>  <Button variant="contained" style={{fontSize: "17px", background:"#F98404"}} onClick={loginWithRedirect} >Sign In</Button>
               </Typography>
             </Grid>
         </Grid>

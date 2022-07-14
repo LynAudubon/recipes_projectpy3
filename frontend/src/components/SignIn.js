@@ -5,10 +5,10 @@ import Pic from '../images/katie-smith-uQs1802D0CQ-unsplash.jpg';
 
 function SignIn() {
     return (
-    <main style={{ height:"100%", padding: '0' }}>
+    <main style={{ display:"flex", alignItems:"center", justifyContent:"center", paddingTop:"35px"}}>
       <Grid>
-        <Grid container justifyContent="center">
-             <img src={Pic} height='600' width='700' alt='recipe'/>
+        <Grid container>
+             <img src={Pic} style={{borderRadius:"10px"}} height='525' width='600' alt='recipe'/>
         </Grid>
       </Grid>
     </main>

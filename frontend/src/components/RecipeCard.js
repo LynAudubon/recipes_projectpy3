@@ -25,7 +25,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Stack from '@material-ui/core/Stack';
 
-
 function Label(props) {
   return (
       <label class="contained">{props.data} 
@@ -42,6 +41,8 @@ export default function RecipeCard(props) {
     return state.recipes.filter((x)=> x.id === id)[0];
   });
 
+const [recipe, setRecipe] = useState(item !== undefined ? item : JSON.parse(window.localStorage.getItem(`recipe${id}`))); 
+
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
 
@@ -54,6 +55,17 @@ export default function RecipeCard(props) {
       return;
     }
     setOpen(false);
+  };
+
+  const handlePrint = (event) => {
+    if (anchorRef.current && anchorRef.current.contains(event.target)) {
+      return;
+    }
+    setOpen(false);
+
+    const card = document.getElementById('print')
+    window.print('', card);
+
   };
 
   function handleListKeyDown(event) {
@@ -86,19 +98,16 @@ export default function RecipeCard(props) {
     }),
   }));
 
-  const [recipe, setRecipe] = useState(item);
-  console.log('recipe', recipe); 
-  
+    useEffect(() => {
+    const data = window.localStorage.getItem(`recipe${id}`);
+    console.log('d',data);
+    setRecipe(JSON.parse(data));
+  }, [])
 
   useEffect(() => {
-    if(recipe === undefined) {const data = window.localStorage.getItem(JSON.parse("recipe" + {id}))
-    setRecipe(data)
-  }
-  }, 
-
-  useEffect(() => {
-    window.localStorage.setItem(`recipe${id}`, JSON.parse(JSON.stringify(recipe)))
+    window.localStorage.setItem(`recipe${id}`, JSON.stringify(recipe))
   })
+
   
   console.log('recipe2', recipe)
   const ingredientsList = recipe.ingredients.split(',');
@@ -110,7 +119,8 @@ export default function RecipeCard(props) {
   };
 
   return (
-    <Card sx={{ maxWidth: 345 }}>
+    <main style={{ height:"100%", width:"100%", display:"flex", alignItems:"center", justifyContent:"center"}}>
+      <Card id="print" sx={{ height: '70vh', maxWidth: 660, overflowY: 'auto'}}>
       <CardHeader
         avatar={
           <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
@@ -146,7 +156,7 @@ export default function RecipeCard(props) {
                   placement === 'bottom-start' ? 'left top' : 'left bottom',
               }}
             >
-              <Paper>
+              <Paper id="paper"  sx={{ maxWidth: 70}}>
                 <ClickAwayListener onClickAway={handleClose}>
                   <MenuList
                     autoFocusItem={open}
@@ -154,9 +164,7 @@ export default function RecipeCard(props) {
                     aria-labelledby="composition-button"
                     onKeyDown={handleListKeyDown}
                   >
-                    <MenuItem onClick={handleClose}>Profile</MenuItem>
-                    <MenuItem onClick={handleClose}>My account</MenuItem>
-                    <MenuItem onClick={handleClose}>Logout</MenuItem>
+                    <MenuItem onClick={handlePrint}>Print</MenuItem>
                   </MenuList>
                 </ClickAwayListener>
               </Paper>
@@ -219,5 +227,7 @@ export default function RecipeCard(props) {
         </CardContent>
       </Collapse>
     </Card>
+    </main>
+    
   );
 }

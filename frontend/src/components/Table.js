@@ -1,7 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useState, useMemo, useContext, useEffect } from 'react';
+import { AppContext } from './AppContext';
 import { useAuth0 } from '@auth0/auth0-react'
 import  { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import SearchIcon from "@mui/icons-material/Search";
+import TextField from '@material-ui/core/TextField';
 import PropTypes from 'prop-types';
 import { alpha } from '@material-ui/core/styles';
 import { Box, Button } from '@material-ui/core';
@@ -22,7 +25,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import DeleteIcon from '@material-ui/icons/Delete';
-import FilterListIcon from '@material-ui/icons/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import  { recipeSlice } from '../redux/slice/recipe';
 import { DELETE_RECIPE_BY_ID, GET_RECIPES } from '../redux/types';
@@ -107,6 +109,24 @@ const headCells = [
   },
   
 ];
+
+const SearchBar = ({setSearchQuery, onSearch}) => (
+  <form style={{display: 'flex'}}>
+    <TextField
+      id="search-bar"
+      className="text"
+      onInput={(e) => {
+        setSearchQuery(e.target.value);
+      }}
+      placeholder="Search Field"
+      size="small"
+    />
+    <IconButton type="submit" aria-label="search" onClick={() => onSearch()}>
+      <SearchIcon style={{ fill: "grey" }}/>
+    </IconButton>
+  </form>
+);
+
 function EnhancedTableHead(props) {
   const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } =
     props;
@@ -162,7 +182,15 @@ EnhancedTableHead.propTypes = {
 };
 
 const EnhancedTableToolbar = (props) => {
-  const { numSelected, onDelete } = props;
+  const [searchQuery, setSearchQuery] = useState("");
+  const { numSelected, onDelete} = props;
+  const { handleState } = useContext(AppContext);
+  console.log('query', searchQuery)
+  const handleSearch = useMemo(() => {
+    console.log('handlesearch')
+    handleState(searchQuery);
+  }, [searchQuery])
+
   return (
     <Toolbar
       sx={{
@@ -200,10 +228,18 @@ const EnhancedTableToolbar = (props) => {
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <FilterListIcon />
-          </IconButton>
+        <Tooltip title="Search list">
+         <div
+          style={{
+          display: "flex",
+          alignSelf: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          padding: 20
+      }}
+    >
+      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} onSearch={handleSearch}/>
+    </div>
         </Tooltip>
       )}
     </Toolbar>
@@ -215,14 +251,15 @@ EnhancedTableToolbar.propTypes = {
   onDelete: PropTypes.func.isRequired
 };
 
+
 export default function EnhancedTable() {
   const rows = useSelector(state => state.recipes);
-  console.log('rows',rows)
+  console.log('rows',rows);
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch({type: GET_RECIPES})
-  }, [dispatch]);
+  });
   
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
@@ -288,6 +325,19 @@ export default function EnhancedTable() {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
+  const query = useContext(AppContext).currentState;
+  const  filterData = (searched, data) => {
+    console.log('s', searched)
+  if (searched === null) {
+    return data;
+  } else {
+    console.log('data', data)
+    return data.filter((d) => (d.name).toLowerCase().includes(searched));
+  }
+};
+
+  const dataFiltered = filterData(query, rows);
+
   const {user, isAuthenticated, isLoading } = useAuth0();
 
   return (
@@ -313,7 +363,7 @@ export default function EnhancedTable() {
             <TableBody >
               {/* if you don't need to support IE11, you can replace the `stableSort` call with:
                  rows.slice().sort(getComparator(order, orderBy)) */}
-              {stableSort(rows, getComparator(order, orderBy))
+              {stableSort(dataFiltered, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                   const isItemSelected = isSelected(row.name);
@@ -356,7 +406,8 @@ export default function EnhancedTable() {
                       <TableCell align="center">{row.date_modified}</TableCell>
                       <TableCell align="center">
                             <Link to={`/update-recipe/${row.id}`} style={{textDecoration:'none'}}>
-                                <Button onClick={() => dispatch(recipeSlice(row))} variant='contained'>UPDATE</Button>
+                                <Button onClick={() => dispatch(recipeSlice(row))}
+                                style={{background:"#F98404"}} variant='contained'>UPDATE</Button>
                             </Link>
                        </TableCell>
                        <TableCell align="left">
